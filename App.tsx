@@ -21,6 +21,7 @@ const App: React.FC = () => {
   const [lessons, setLessons] = useState<Lesson[]>([]);
   const [isFormOpen, setIsFormOpen] = useState(false);
   const [lessonToEdit, setLessonToEdit] = useState<Lesson | null>(null);
+  const [prefilledSlot, setPrefilledSlot] = useState<ScheduleSlot | null>(null);
   const [selectedLesson, setSelectedLesson] = useState<LessonInstance | null>(null);
   const [viewDate, setViewDate] = useState(new Date());
   const [toasts, setToasts] = useState<Toast[]>([]);
@@ -67,7 +68,7 @@ const App: React.FC = () => {
             const diffInMinutes = (lessonTime.getTime() - now.getTime()) / (1000 * 60);
             const reminderId = `${lesson.id}-${slot.dayOfWeek}-${slot.time}-${todayStr}`;
 
-            // Trigger reminder if it's exactly 30 minutes away (checking 29-31 window to be safe with interval)
+            // Trigger reminder if it's exactly 30 minutes away
             if (diffInMinutes > 29 && diffInMinutes <= 30 && !sentRemindersRef.current[reminderId]) {
               sendReminderEmail(lesson, slot);
               sentRemindersRef.current[reminderId] = todayStr;
@@ -80,11 +81,8 @@ const App: React.FC = () => {
     const sendReminderEmail = (lesson: Lesson, slot: ScheduleSlot) => {
       const message = `Напоминание: Урок с ${lesson.studentName} по предмету "${lesson.course}" начнется через 30 минут (в ${slot.time}).`;
       
-      // Simulate email sending
       console.log(`%c[Email Service] Sending lesson reminder to ${currentUser.email}...`, "color: #4f46e5; font-weight: bold;");
-      console.log(`%cMessage: ${message}`, "color: #1e293b;");
 
-      // Visual feedback in UI
       const id = Math.random().toString(36).substr(2, 9);
       setToasts(prev => [...prev, { id, message, type: 'info' }]);
       setTimeout(() => {
@@ -92,8 +90,8 @@ const App: React.FC = () => {
       }, 8000);
     };
 
-    const intervalId = setInterval(checkReminders, 60000); // Check every minute
-    checkReminders(); // Initial check
+    const intervalId = setInterval(checkReminders, 60000);
+    checkReminders();
 
     return () => clearInterval(intervalId);
   }, [lessons, currentUser]);
@@ -148,6 +146,7 @@ const App: React.FC = () => {
     }
     setIsFormOpen(false);
     setLessonToEdit(null);
+    setPrefilledSlot(null);
   };
 
   const handleUpdateLesson = (updatedLesson: Lesson) => {
@@ -181,6 +180,13 @@ const App: React.FC = () => {
   const handleEditTrigger = (lesson: Lesson) => {
     setSelectedLesson(null);
     setLessonToEdit(lesson);
+    setPrefilledSlot(null);
+    setIsFormOpen(true);
+  };
+
+  const handleSlotClick = (day: DayOfWeek, hour: string) => {
+    setPrefilledSlot({ dayOfWeek: day, time: hour });
+    setLessonToEdit(null);
     setIsFormOpen(true);
   };
 
@@ -191,8 +197,11 @@ const App: React.FC = () => {
         .map(slot => (
           <div
             key={`${lesson.id}-${slot.dayOfWeek}-${slot.time}`}
-            onClick={() => setSelectedLesson({ ...lesson, currentSlot: slot, instanceDescription: lesson.description })}
-            className="absolute inset-x-1 top-1 bg-indigo-100 border-l-4 border-indigo-600 p-2 rounded-lg cursor-pointer hover:bg-indigo-200 transition shadow-sm group overflow-hidden"
+            onClick={(e) => {
+                e.stopPropagation();
+                setSelectedLesson({ ...lesson, currentSlot: slot, instanceDescription: lesson.description });
+            }}
+            className="absolute inset-x-1 top-1 bg-indigo-100 border-l-4 border-indigo-600 p-2 rounded-lg cursor-pointer hover:bg-indigo-200 transition shadow-sm group overflow-hidden z-10"
             style={{ height: 'calc(100% - 8px)' }}
           >
             <div className="font-bold text-indigo-900 text-xs truncate">{lesson.studentName}</div>
@@ -280,7 +289,14 @@ const App: React.FC = () => {
               {DAYS.map(day => (
                 <div key={day} className="border-l relative group">
                   {HOURS.map(hour => (
-                    <div key={`${day}-${hour}`} className="h-20 border-b relative">
+                    <div 
+                        key={`${day}-${hour}`} 
+                        onClick={() => handleSlotClick(day, hour)}
+                        className="h-20 border-b relative hover:bg-indigo-50/30 transition-colors cursor-crosshair group/slot"
+                    >
+                      <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover/slot:opacity-100 transition-opacity">
+                        <svg className="w-6 h-6 text-indigo-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path></svg>
+                      </div>
                       {renderLessonsForSlot(day, hour)}
                     </div>
                   ))}
@@ -310,7 +326,7 @@ const App: React.FC = () => {
       </div>
 
       <button
-        onClick={() => { setLessonToEdit(null); setIsFormOpen(true); }}
+        onClick={() => { setLessonToEdit(null); setPrefilledSlot(null); setIsFormOpen(true); }}
         className="fixed bottom-8 right-8 w-16 h-16 bg-indigo-600 text-white rounded-full shadow-2xl flex items-center justify-center hover:bg-indigo-700 hover:scale-110 active:scale-95 transition-all z-40 group"
       >
         <svg className="w-8 h-8 transition-transform group-hover:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -321,8 +337,9 @@ const App: React.FC = () => {
       {isFormOpen && (
         <LessonForm
           initialLesson={lessonToEdit || undefined}
+          prefilledSlot={prefilledSlot || undefined}
           onSubmit={handleSaveLesson}
-          onCancel={() => { setIsFormOpen(false); setLessonToEdit(null); }}
+          onCancel={() => { setIsFormOpen(false); setLessonToEdit(null); setPrefilledSlot(null); }}
         />
       )}
 
