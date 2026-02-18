@@ -4,12 +4,11 @@ import { Lesson, ScheduleSlot, DAYS, DayOfWeek } from '../types';
 
 interface LessonFormProps {
   initialLesson?: Lesson;
-  prefilledSlot?: ScheduleSlot;
   onSubmit: (lesson: Lesson) => void;
   onCancel: () => void;
 }
 
-const LessonForm: React.FC<LessonFormProps> = ({ initialLesson, prefilledSlot, onSubmit, onCancel }) => {
+const LessonForm: React.FC<LessonFormProps> = ({ initialLesson, onSubmit, onCancel }) => {
   const [formData, setFormData] = useState<Partial<Lesson>>(
     initialLesson || {
       studentName: '',
@@ -19,19 +18,9 @@ const LessonForm: React.FC<LessonFormProps> = ({ initialLesson, prefilledSlot, o
       lessonNumber: 1,
       course: '',
       frequency: 1,
-      slots: prefilledSlot ? [prefilledSlot] : [{ dayOfWeek: 'Monday', time: '10:00' }],
+      slots: [{ dayOfWeek: 'Monday', time: '10:00' }],
     }
   );
-
-  // Sync state if prefilledSlot changes or form is re-opened
-  useEffect(() => {
-    if (!initialLesson && prefilledSlot) {
-        setFormData(prev => ({
-            ...prev,
-            slots: [prefilledSlot]
-        }));
-    }
-  }, [prefilledSlot, initialLesson]);
 
   const handleFrequencyChange = (freq: number) => {
     const newSlots = [...(formData.slots || [])];

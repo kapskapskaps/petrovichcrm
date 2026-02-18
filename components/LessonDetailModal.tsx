@@ -29,18 +29,6 @@ const LessonDetailModal: React.FC<LessonDetailModalProps> = ({ lesson, onUpdate,
     setIsGenerating(false);
   };
 
-  const getTelegramLink = (phone: string) => {
-    if (!phone) return '#';
-    const digits = phone.replace(/\D/g, '');
-    return `https://t.me/+${digits}`;
-  };
-
-  const TelegramIcon = () => (
-    <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
-      <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.02-.09.02-1.49.95-4.22 2.79-.4.27-.76.41-1.08.4-.36-.01-1.04-.2-1.55-.37-.63-.2-1.12-.31-1.08-.66.02-.18.27-.36.74-.55 2.92-1.27 4.86-2.11 5.83-2.51 2.78-1.16 3.35-1.36 3.73-1.36.08 0 .27.02.39.12.1.08.13.19.14.27-.01.06.01.24 0 .38z" />
-    </svg>
-  );
-
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50 overflow-y-auto">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-200">
@@ -67,33 +55,13 @@ const LessonDetailModal: React.FC<LessonDetailModalProps> = ({ lesson, onUpdate,
 
         <div className="p-8 space-y-6">
           <div className="grid grid-cols-2 gap-4 text-sm">
-            <div className="p-3 bg-gray-50 rounded-lg border border-gray-100 flex flex-col">
-              <span className="block text-gray-500 font-medium text-[10px] uppercase tracking-wider mb-1">Ученик</span>
-              <span className="text-gray-900 font-medium truncate mb-2">{lesson.studentContact || 'Нет контакта'}</span>
-              {lesson.studentContact && (
-                <a 
-                  href={getTelegramLink(lesson.studentContact)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-auto flex items-center justify-center gap-2 py-1.5 px-3 bg-[#0088cc] text-white rounded-lg text-[11px] font-bold hover:bg-[#0077b5] transition-colors"
-                >
-                  <TelegramIcon /> Telegram
-                </a>
-              )}
+            <div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+              <span className="block text-gray-500 font-medium text-[10px] uppercase tracking-wider mb-1">Родитель</span>
+              <span className="text-gray-900 font-medium">{lesson.parentName || 'Не указано'}</span>
             </div>
-            <div className="p-3 bg-gray-50 rounded-lg border border-gray-100 flex flex-col">
-              <span className="block text-gray-500 font-medium text-[10px] uppercase tracking-wider mb-1">Родитель ({lesson.parentName || 'Имя не указано'})</span>
-              <span className="text-gray-900 font-medium truncate mb-2">{lesson.parentContact || 'Нет контакта'}</span>
-              {lesson.parentContact && (
-                <a 
-                  href={getTelegramLink(lesson.parentContact)}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-auto flex items-center justify-center gap-2 py-1.5 px-3 bg-[#0088cc] text-white rounded-lg text-[11px] font-bold hover:bg-[#0077b5] transition-colors"
-                >
-                  <TelegramIcon /> Telegram
-                </a>
-              )}
+            <div className="p-3 bg-gray-50 rounded-lg border border-gray-100">
+              <span className="block text-gray-500 font-medium text-[10px] uppercase tracking-wider mb-1">Контакт ученика</span>
+              <span className="text-gray-900 font-medium">{lesson.studentContact || 'Не указано'}</span>
             </div>
           </div>
 

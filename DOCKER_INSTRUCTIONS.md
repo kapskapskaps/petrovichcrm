@@ -1,12 +1,9 @@
-# TutorMaster CRM
 
-A comprehensive CRM for private tutors featuring a weekly calendar, student management, and AI-powered progress tracking.
-
-## Инструкция по использованию Docker
+# Инструкция по использованию Docker для TutorMaster CRM
 
 Данный проект полностью контейнеризирован для обеспечения стабильной работы в любой среде.
 
-### Быстрый запуск (Docker Compose)
+## Быстрый запуск (Docker Compose)
 
 Самый простой способ запустить CRM — использовать `docker-compose`.
 
@@ -25,7 +22,7 @@ A comprehensive CRM for private tutors featuring a weekly calendar, student mana
 3.  **Доступ к приложению**:
     CRM будет доступна по адресу: [http://localhost:8080](http://localhost:8080)
 
-### Ручная сборка (Dockerfile)
+## Ручная сборка (Dockerfile)
 
 Если вы хотите собрать образ вручную:
 
@@ -39,11 +36,11 @@ A comprehensive CRM for private tutors featuring a weekly calendar, student mana
     docker run -p 8080:80 tutormaster-crm
     ```
 
-### Особенности сборки
+## Особенности сборки
 *   **Multi-stage build**: Сначала Node.js собирает проект (транспиляция TSX, минификация), затем готовые статические файлы передаются в легковесный Nginx.
 *   **Безопасность**: Секретные ключи передаются через аргументы сборки или переменные окружения.
 *   **Оптимизация**: Использование `.dockerignore` гарантирует, что образ будет иметь минимальный размер.
 
-### Устранение неполадок
+## Устранение неполадок
 *   Если изменения в коде не отображаются, используйте флаг `--build` при запуске compose.
 *   Убедитесь, что порт `8080` не занят другим приложением.
