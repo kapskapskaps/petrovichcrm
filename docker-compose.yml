@@ -1,0 +1,59 @@
+version: '3.8'
+
+services:
+  # База данных PostgreSQL
+  db:
+    image: postgres:15-alpine
+    container_name: petrovich-db
+    restart: always
+    environment:
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-password}
+      POSTGRES_DB: ${DB_NAME:-petrovich_crm}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - petrovich-network
+
+  # Backend (NestJS)
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: petrovich-api
+    restart: always
+    environment:
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD:-password}@db:5432/${DB_NAME:-petrovich_crm}?schema=public
+      PORT: 3000
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    networks:
+      - petrovich-network
+
+  # Frontend (Next.js)
+  web:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: petrovich-web
+    restart: always
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:3000
+    ports:
+      - "3001:3001"
+    depends_on:
+      - api
+    networks:
+      - petrovich-network
+
+networks:
+  petrovich-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
